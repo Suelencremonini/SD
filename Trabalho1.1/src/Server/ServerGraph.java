@@ -47,7 +47,6 @@ public class ServerGraph {
         try {
             TServerTransport serverTransport = new TServerSocket(portNumber);
             TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor));
-            System.out.println("funcionou");
             System.out.println("Starting the simple server...");
             server.serve();
         } catch (Exception e) {
