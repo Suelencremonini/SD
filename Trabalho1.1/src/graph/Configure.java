@@ -51,13 +51,15 @@ public class Configure {
                 if(i.getName() == (int)j.getV1id()){
                     i.addDestination(findNode(n,(int)j.getV2id()), j.Weight);
                 }
+                if(i.getName() == (int)j.getV2id() && j.getFlag() == 1){
+                    i.addDestination(findNode(n,(int)j.getV1id()), j.Weight);
+                }
             }
         }
         
         for(Node i: n){
             graph.addNode(i);
         }
-        
         
         graph = Dijkstra.calculateShortestPathFromSource(graph,findNode(n,begin));
         
