@@ -18,6 +18,7 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
+import graph.Configure;
 /**
  *
  * @author jose
@@ -330,6 +331,21 @@ public class GraphHandler implements Graph.Iface{
                 semaphore.release();
             }
         }
+    }
+
+    @Override
+    public List<Integer> Dijkstra(int source, int goal) throws TException {
+        List<Integer> result = null;
+        try{
+            if(existenceVertex(source) && existenceVertex(goal))
+                result = Configure.ConfigureVertex(v, e, source, goal);
+        }
+        catch(Exception excp){}
+        finally{
+            semaphore.release();
+        }
+        
+        return result;
     }
     
 

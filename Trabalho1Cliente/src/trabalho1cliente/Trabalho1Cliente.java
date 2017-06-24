@@ -81,7 +81,8 @@ public class Trabalho1Cliente {
             System.out.println("8-Listar aresta de um vértice");
             System.out.println("9-Listar vértices vizinhos de um vértice");
             System.out.println("10-Updates");
-            System.out.println("11-Sair");
+            System.out.println("11-Menor caminho(Dijkstra)");
+            System.out.println("12-Sair");
             choose = sc.nextInt();
             switch(choose){
                 case 1:
@@ -219,8 +220,21 @@ public class Trabalho1Cliente {
                         client.UpdateEdgesWeight(peso, v1, v2);
                     }
                     break;
-                    
                 case 11:
+                    List<Integer> li;
+                    System.out.println("Insira o vértice inicial");
+                    v1 = sc.nextInt();
+                    System.out.println("Insira o vértice final");
+                    v2 = sc.nextInt();
+                    li = client.Dijkstra(v1,v2);
+                    System.out.println("Menor caminho:");
+                    for(Integer i: li){
+                        System.out.printf("%d ->", i);
+                    }
+                    System.out.printf("%d", v2);
+                    System.out.printf("\n");
+                    break;
+                case 12:
                     flag = false;
                     
             }

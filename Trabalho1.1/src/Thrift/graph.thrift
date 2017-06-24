@@ -43,6 +43,6 @@ service Graph{
     list<Vertex> GetVertexEdges(1: i32 vertex1, 2: i32 vertex2),
     list<Edges> GetEdgesVertex(1: i32 name),
     list<Vertex> GetAdjacentVertex(1: i32 name),
-    void serverConnected(1: CurrentServer current)
-
+    void serverConnected(1: CurrentServer current),
+    list<i32> Dijkstra(1: i32 source, 2: i32 goal)
 }
