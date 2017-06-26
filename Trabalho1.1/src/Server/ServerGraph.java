@@ -52,7 +52,6 @@ public class ServerGraph {
             TServerSocket serverSocket = new TServerSocket(portNumber);
             TServerTransport serverTransport = serverSocket;
             TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor));
-            System.out.println("funcionou");
             System.out.println("Starting the simple server...");
             if(portNumber != 9090){
                 connectToCentralServer(serverSocket.getServerSocket().getInetAddress().getHostAddress(), true);
