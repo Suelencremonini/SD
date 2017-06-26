@@ -7,6 +7,10 @@ package Server;
 
 import Thrift.*;
 import Thrift.GraphHandler;
+import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -43,14 +47,45 @@ public class ServerGraph {
         }
     }
     
-    public static void simple(Graph.Processor processor) {
+    public static void simple(Graph.Processor processor) {   
         try {
-            TServerTransport serverTransport = new TServerSocket(portNumber);
+            TServerSocket serverSocket = new TServerSocket(portNumber);
+            TServerTransport serverTransport = serverSocket;
             TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor));
             System.out.println("funcionou");
             System.out.println("Starting the simple server...");
+            if(portNumber != 9090){
+                connectToCentralServer(serverSocket.getServerSocket().getInetAddress().getHostAddress(), true);
+            }
             server.serve();
         } catch (Exception e) {
+        }
+    }
+    
+     public static void connectToCentralServer(String ipAddress, boolean connected) {
+        Map<Long, Server> tableServers = new HashMap<>();
+        try {
+            System.out.println("connectToCentralServer");
+            TTransport transport;
+            transport = new TSocket("localhost", 9090);
+            transport.open();
+            TProtocol protocol = new  TBinaryProtocol(transport);
+            Graph.Client client = new Graph.Client(protocol);
+            
+            Server self = new Server();
+            self.setIp(ipAddress);
+            self.setPortNumber(portNumber);
+            
+            Server central = new Server();
+            central.setIp("localhost");
+            central.setPortNumber(9090);
+            client.teste();
+            client.serverConnected(central);
+            System.out.println("to no central");
+            handler.setServersTable(client.comunicateConnectionToCentralServer(self, connected));
+            transport.close();
+        } catch (TException x) {
+            System.out.println("falhou na conexão");
         }
     }
 }

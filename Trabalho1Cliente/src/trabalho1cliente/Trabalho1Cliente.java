@@ -10,7 +10,7 @@ package trabalho1cliente;
  * @author jose
  */
 
-import Thrift.CurrentServer;
+import Thrift.Server;
 import Thrift.Edges;
 import Thrift.Graph;
 import Thrift.Vertex;
@@ -21,6 +21,7 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import java.util.Scanner;
+import java.util.Set;
 public class Trabalho1Cliente {
 
     /**
@@ -56,13 +57,14 @@ public class Trabalho1Cliente {
     }
     private static void perform(Graph.Client client, String[] args) throws TException{
 
-        CurrentServer currentServer = new CurrentServer();
-        currentServer.setCurrentIp(args[0]);
-        currentServer.setCurrentPortNumber(Integer.parseInt(args[1]));
+        Server currentServer = new Server();
+        currentServer.setIp(args[0]);
+        currentServer.setPortNumber(Integer.parseInt(args[1]));
         client.serverConnected(currentServer);
         Edges e = new Edges();
         Vertex v = new Vertex();
         List<Vertex> lv;
+        Set<Edges> setEdges;
         List<Edges> le;
         Scanner sc = new Scanner(System.in);
         int v1, v2;
@@ -129,8 +131,8 @@ public class Trabalho1Cliente {
                     }
                     break;
                 case 6:
-                    le = client.GetEdges();
-                    for(Edges i: le){
+                    setEdges = client.GetEdges();
+                    for(Edges i: setEdges){
                         printEdges(i);
                     }
                     break;
