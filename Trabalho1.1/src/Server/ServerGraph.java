@@ -64,7 +64,6 @@ public class ServerGraph {
      public static void connectToCentralServer(String ipAddress, boolean connected) {
         Map<Long, Server> tableServers = new HashMap<>();
         try {
-            System.out.println("connectToCentralServer");
             TTransport transport;
             transport = new TSocket("localhost", 9090);
             transport.open();
@@ -78,9 +77,7 @@ public class ServerGraph {
             Server central = new Server();
             central.setIp("localhost");
             central.setPortNumber(9090);
-            client.teste();
             client.serverConnected(central);
-            System.out.println("to no central");
             handler.setServersTable(client.comunicateConnectionToCentralServer(self, connected));
             transport.close();
         } catch (TException x) {
