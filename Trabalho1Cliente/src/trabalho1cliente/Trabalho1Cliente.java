@@ -187,14 +187,14 @@ public class Trabalho1Cliente {
                         pos = sc.nextInt();
                         client.UpdateVertexDescription(desc, pos);
                     }
-                    else if(op == 2){
+                    else if(op == 3){
                         System.out.println("Digite o novo peso");
                         peso = sc.nextFloat();
                         System.out.println("Digite o vértice que você deseja alterar");
                         pos = sc.nextInt();
                         client.UpdateVertexWeight(peso, pos);
                     }
-                    else if(op == 3){
+                    else if(op == 4){
                         int ori;
                         System.out.println("Digite a nova orientção da aresta");
                         ori = sc.nextInt();
@@ -204,7 +204,7 @@ public class Trabalho1Cliente {
                         client.UpdateEdgesFlag(ori, v1, v2);
                         
                     }
-                    else if(op == 4){
+                    else if(op == 5){
                         System.out.println("Digite a nova descrição");
                         sc = new Scanner(System.in);
                         desc = sc.nextLine();
@@ -213,7 +213,7 @@ public class Trabalho1Cliente {
                         v2 = sc.nextInt();
                         client.UpdateEdgesDescription(desc, v1, v2);
                     }
-                    else if(op == 5){
+                    else if(op == 6){
                         System.out.println("Digite o novo peso");
                         peso = sc.nextFloat();
                         System.out.println("Digite os vertices da aresta");

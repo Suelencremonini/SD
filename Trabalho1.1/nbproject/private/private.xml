@@ -3,10 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Suelen/Documents/UFU/8periodo/sistemasdistribuidos/SD/Trabalho1.1/src/Thrift/Graph.java</file>
-            <file>file:/C:/Users/Suelen/Documents/UFU/8periodo/sistemasdistribuidos/SD/Trabalho1.1/src/Thrift/GraphHandler.java</file>
-            <file>file:/C:/Users/Suelen/Documents/UFU/8periodo/sistemasdistribuidos/SD/Trabalho1.1/src/Thrift/graph.thrift</file>
-            <file>file:/C:/Users/Suelen/Documents/UFU/8periodo/sistemasdistribuidos/SD/Trabalho1.1/src/Server/ServerGraph.java</file>
+            <file>file:/C:/Users/Suelen/Documents/UFU/8periodo/sistemasdistribuidos/SD_merged/Trabalho1.1/src/Server/ServerGraph.java</file>
+            <file>file:/C:/Users/Suelen/Documents/UFU/8periodo/sistemasdistribuidos/SD_merged/Trabalho1.1/src/graph/Configure.java</file>
+            <file>file:/C:/Users/Suelen/Documents/UFU/8periodo/sistemasdistribuidos/SD_merged/Trabalho1.1/src/Thrift/GraphHandler.java</file>
+            <file>file:/C:/Users/Suelen/Documents/UFU/8periodo/sistemasdistribuidos/SD_merged/Trabalho1.1/src/Thrift/graph.thrift</file>
         </group>
     </open-files>
 </project-private>
