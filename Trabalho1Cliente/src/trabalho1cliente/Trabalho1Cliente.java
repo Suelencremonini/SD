@@ -22,6 +22,7 @@ import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import java.util.Scanner;
 import java.util.Set;
+
 public class Trabalho1Cliente {
 
     /**

@@ -5,8 +5,13 @@
  */
 package Server;
 
+import Copycat.CopycatStateMachine;
 import Thrift.*;
 import Thrift.GraphHandler;
+import io.atomix.catalyst.transport.Address;
+import io.atomix.copycat.server.CopycatServer;
+import io.atomix.copycat.server.storage.Storage;
+import io.atomix.copycat.server.storage.StorageLevel;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,15 +59,14 @@ public class ServerGraph {
             TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor));
             System.out.println("Starting the simple server...");
             if(portNumber != 9090){
-                connectToCentralServer(serverSocket.getServerSocket().getInetAddress().getHostAddress(), true);
-            }
+               connectToCentralServer("localhost", true);
+            }            
             server.serve();
         } catch (Exception e) {
         }
     }
     
      public static void connectToCentralServer(String ipAddress, boolean connected) {
-        Map<Long, Server> tableServers = new HashMap<>();
         try {
             TTransport transport;
             transport = new TSocket("localhost", 9090);
@@ -71,7 +75,7 @@ public class ServerGraph {
             Graph.Client client = new Graph.Client(protocol);
             
             Server self = new Server();
-            self.setIp(ipAddress);
+            self.setIp("localhost");
             self.setPortNumber(portNumber);
             
             Server central = new Server();

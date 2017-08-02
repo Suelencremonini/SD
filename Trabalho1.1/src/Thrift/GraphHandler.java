@@ -30,6 +30,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import graph.Configure;
+
+import Copycat.*;
+import io.atomix.catalyst.transport.Address;
+import io.atomix.copycat.client.ConnectionStrategies;
+import io.atomix.copycat.client.CopycatClient;
+import io.atomix.copycat.server.CopycatServer;
+import io.atomix.copycat.server.storage.Storage;
+import io.atomix.copycat.server.storage.StorageLevel;
 /**
  *
  * @author jose
@@ -44,12 +52,21 @@ public class GraphHandler implements Graph.Iface{
     Server currentServer = new Server();
     Map<Long, Server> serversTable = new HashMap<>();
     
+    CopycatClient copycatClient1;
+    CopycatClient copycatClient2;
+    CopycatClient copycatClient3;
+   
+    CopycatServer copycatServer1;
+    CopycatServer copycatServer2;
+    CopycatServer copycatServer3;
+    
     @Override
     public void serverConnected(Server current){
         try {
             this.semaphoreCurrentServer.acquire();
             this.currentServer.setIp(current.getIp());
             this.currentServer.setPortNumber(current.getPortNumber());
+
         } catch(Exception e){
             System.out.println("exception em serverConnected");
         }
@@ -70,14 +87,34 @@ public class GraphHandler implements Graph.Iface{
         try {
             semaphoreServersTable.acquire();
             this.serversTable.put(Long.valueOf(this.serversTable.size()), server);
+
+            setCopycatClient(server);
             
             sendNewServersTable(server);
         } catch(Exception e){
-            System.out.println("exception em comunicateConnectionToCentralServer");
+            System.out.println("exception em comunicateConnectionToCentralServer: "+e);
         }
         finally{
             semaphoreServersTable.release();
             return this.serversTable;
+        }
+    }
+    
+    private void setCopycatClient(Server server) {
+        try {
+        this.copycatClient1 = CopycatClient.builder()
+                .withConnectionStrategy(ConnectionStrategies.FIBONACCI_BACKOFF)
+                .build();
+        
+        List<Address> cluster = new ArrayList<>();
+        cluster.add(new Address(server.getIp(), server.getPortNumber()+1));
+        cluster.add(new Address(server.getIp(), server.getPortNumber()+2));
+        cluster.add(new Address(server.getIp(), server.getPortNumber()+3));
+
+        this.copycatClient1.connect(cluster).join();
+        
+        }catch (Exception e) {
+            System.out.println("exception: "+e);
         }
     }
     
@@ -133,7 +170,6 @@ public class GraphHandler implements Graph.Iface{
         }
     }
     
-    
     /**
      * seta a tabela de servers global do servidor atual com a tabela que o servidor central enviou como parametro
      * @param serversTableLocal 
@@ -148,7 +184,7 @@ public class GraphHandler implements Graph.Iface{
      * @return 
      */
     private Long hashFunction(long numForHash) {
-       return numForHash%this.serversTable.size();
+       return (numForHash%this.serversTable.size());
     }
     
     /**
@@ -159,7 +195,10 @@ public class GraphHandler implements Graph.Iface{
     private Server getCorrectServerForVertex(long nameVertex){        
         try {
             semaphoreServersTable.acquire();
-            return this.serversTable.get(this.hashFunction(nameVertex));
+            Server correctServer = this.serversTable.get(this.hashFunction(nameVertex));
+            setCopycatClient(currentServer);
+            
+            return correctServer;
         } catch (Exception x) {
             System.out.println("exception em newServersTable: "+x);
             return null;
@@ -194,7 +233,6 @@ public class GraphHandler implements Graph.Iface{
         return false;
     }
     
-   
     public boolean existenceVertex(long name){
          try{
             Server correctServer = this.getCorrectServerForVertex(name);
@@ -208,7 +246,7 @@ public class GraphHandler implements Graph.Iface{
                 return (Boolean)connectToServer (correctServer, listLong, Graph.Client.class.getMethod("existenceVertex", longType));
             }
             else {
-                for(Vertex i: v){
+                for(Vertex i: getV()){
                     if(i.getName() == name){
                         return true;
                     }
@@ -235,7 +273,7 @@ public class GraphHandler implements Graph.Iface{
                 return (Boolean)connectToServer (correctServer, listEdges, Graph.Client.class.getMethod("existenceEdges", edgesType));
             }
             else {
-                 for(Edges i: e){
+                 for(Edges i: getE()){
                     if((i.getV1id() == edge.getV1id() && i.getV2id() == edge.getV2id()) || (i.getV1id() == edge.getV2id() && i.getV2id() == edge.getV1id())){
                         return true;
                     }
@@ -249,82 +287,74 @@ public class GraphHandler implements Graph.Iface{
     }
     
     public void CreateEdges(Edges edge) throws org.apache.thrift.TException{
-        if(!existenceEdges(edge)){
-            if(existenceVertex(edge.getV1id()) && existenceVertex(edge.getV2id())){
-                try{
-                    List<Server> correctServerList = this.getCorrectServersForEdge(edge);
-                    for(int i=0; i<correctServerList.size(); i++){
-                        if (!this.areTheSameServers(correctServerList.get(i), currentServer)) {
-                            Edges[] listEdges = new Edges[1];
-                            listEdges[0] = edge;
+        if(!existenceEdges(edge) && existenceVertex(edge.getV1id()) && existenceVertex(edge.getV2id())){
+            try{
+                List<Server> correctServerList = this.getCorrectServersForEdge(edge);
+                for(int i=0; i<correctServerList.size(); i++){
+                    if (!this.areTheSameServers(correctServerList.get(i), currentServer)) {
+                        Edges[] listEdges = new Edges[1];
+                        listEdges[0] = edge;
 
-                            Class[] edgesType = new Class[1];
-                            edgesType[0] = Edges.class;
+                        Class[] edgesType = new Class[1];
+                        edgesType[0] = Edges.class;
 
 
-                            connectToServer (correctServerList.get(i), listEdges, Graph.Client.class.getMethod("actuallyCreateEdge", edgesType));
-                        }
-                        else {
-                            this.actuallyCreateEdge(edge);
-                        }
+                        connectToServer (correctServerList.get(i), listEdges, Graph.Client.class.getMethod("actuallyCreateEdge", edgesType));
+                    }
+                    else {
+                        this.actuallyCreateEdge(edge);
                     }
                 }
-                catch(Exception e){
-                    System.out.println("exception em CreateEdges: "+e);
-                }
+            }
+            catch(Exception e){
+                System.out.println("exception em CreateEdges: "+e);
             }
         }
     }
-    
+
     public void actuallyCreateEdge(Edges edge) {
         try{
-            semaphore.acquire();
-            e.add(edge);;
+            System.out.println("server "+currentServer+" para edge: "+edge);  
+            copycatClient1.submit(new PutCreateEdge(edge.V1id, edge.V2id, edge.Weight, edge.flag, edge.description)).join();
         }catch(Exception e){
             System.out.println("exception em actuallyCreateEdge: "+e);
-        }
-        finally{
-            semaphore.release();
         }
     }
 
     public void CreateVertex(Vertex vertex) throws org.apache.thrift.TException{
-        Server correctServer = this.getCorrectServerForVertex(vertex.getName());
-        try{
-            if (!this.areTheSameServers(correctServer, currentServer)) {
-                Vertex[] vertexes = new Vertex[1];
-                vertexes[0] = vertex;
+        if(!existenceVertex(vertex.getName())){
+            try{
+                Server correctServer = this.getCorrectServerForVertex(vertex.getName());
+                if (!this.areTheSameServers(correctServer, currentServer)) {
+                       Vertex[] vertexes = new Vertex[1];
+                       vertexes[0] = vertex;
 
-                Class[] vertexType = new Class[1];
-                vertexType[0] = Vertex.class;
+                       Class[] vertexType = new Class[1];
+                       vertexType[0] = Vertex.class;
 
-                connectToServer(correctServer, vertexes, Graph.Client.class.getMethod("actuallyCreateVertex", vertexType));
+                       connectToServer(correctServer, vertexes, Graph.Client.class.getMethod("actuallyCreateVertex", vertexType));
+                }
+                else {
+                    this.actuallyCreateVertex(vertex);
+                }
             }
-            else {               
-                this.actuallyCreateVertex(vertex);
+            catch(Exception e){
+                System.out.println("CreateVertex: cai na exception: "+e);
             }
-        }
-        catch(Exception e){
-            System.out.println("CreateVertex: cai na exception: "+e);
         }
     }
     
     public void actuallyCreateVertex(Vertex vertex) {
         try {
-            if(!existenceVertex(vertex.getName())){
-                System.out.println("server "+currentServer+" para vertice: "+vertex);
-                semaphore.acquire();
-                v.add(vertex);
-            }
+            System.out.println("server "+currentServer+" para vertice: "+vertex);  
+            copycatClient1.submit(new PutCreateVertex(vertex.name, vertex.color, vertex.description, vertex.weight)).join();
         } catch(Exception e){
             System.out.println("actuallyCreateVertex: cai na exception: "+e);
-        } finally {
-            semaphore.release();            
         }
     }
 
     public Vertex ReadVertex(int vertex) throws org.apache.thrift.TException{
-        for(Vertex i: v){
+        for(Vertex i: getV()){
            if((int)i.getName() == vertex){
                return i;
            }
@@ -333,7 +363,7 @@ public class GraphHandler implements Graph.Iface{
     }
     
      public Edges ReadEdges(Edges edge) throws org.apache.thrift.TException{
-        for(Edges item: e){
+        for(Edges item: getE()){
             if((edge.getV1id() == item.getV1id() && edge.getV2id() == item.getV2id()) || (edge.getV2id() == item.getV1id() && edge.getV1id() == item.getV2id())){
                 return item;
             }
@@ -368,18 +398,15 @@ public class GraphHandler implements Graph.Iface{
         try{
             Edges result = ReadEdges(edge);
             if(result!= null){
-                semaphore.acquire();
-                e.remove(result);
+                copycatClient1.submit(new PutDeleteEdge(result)).join();
             }
         } catch(Exception e){
             System.out.println("exception em actuallyDeleteEdge: "+e);
-        } finally{
-            semaphore.release();
         }
     }
 
     public void DeleteVertex(int vertex) throws org.apache.thrift.TException{
-        try{
+       try{
             Server correctServer = this.getCorrectServerForVertex(vertex);
             if (!this.areTheSameServers(correctServer, currentServer)) {
                 Integer[] listInteger = new Integer[1];
@@ -402,26 +429,21 @@ public class GraphHandler implements Graph.Iface{
         try {
             Vertex result  = ReadVertex(vertex);
             if(result != null){
-                semaphore.acquire();
-                v.remove(result);
+                copycatClient1.submit(new PutDeleteVertex(result)).join();
                 this.deleteEdgesVertex(vertex);
             }
         }catch(Exception e){
             System.out.println("exception em actuallyDeleteVertex: "+e);
-        } finally {
-            semaphore.release();            
         }
     }
     
     public void deleteEdgesVertex(int vertex){
         try{
-            semaphore.release();
             List<Edges> edges = new ArrayList<>();
             edges = this.GetEdgesVertex(vertex);
             for(int i=0; i<edges.size(); i++){
-                this.DeleteEdges((int)edges.get(i).getV1id(), (int)edges.get(i).getV2id());
+                copycatClient1.submit(new PutDeleteEdge(edges.get(i))).join();
             }
-            semaphore.acquire();
         }catch(Exception e){
             System.out.println("exception em deleteEdgesVertex: "+e);
         }
@@ -441,7 +463,7 @@ public class GraphHandler implements Graph.Iface{
             return null;
         } finally{
             semaphoreServersTable.release();
-        } 
+        }
     }
 
     public List<Vertex> GetVertex() throws org.apache.thrift.TException {
@@ -450,11 +472,11 @@ public class GraphHandler implements Graph.Iface{
             this.semaphoreServersTable.acquire();
             for(Iterator<Map.Entry<Long, Server>> it = serversTable.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<Long, Server> entry = it.next();
-                allVertexes.addAll((List<Vertex>)connectToServer (entry.getValue(), null, Graph.Client.class.getMethod("getV", null)));
+                allVertexes.addAll((List<Vertex>)connectToServer(entry.getValue(), null, Graph.Client.class.getMethod("getV", null)));
             }
             return allVertexes;
         }catch(Exception e){
-            System.out.println("exception em GetVertex");
+            System.out.println("exception em GetVertex: "+e);
             return null;
         } finally{
             semaphoreServersTable.release();
@@ -463,25 +485,19 @@ public class GraphHandler implements Graph.Iface{
     
     public List<Vertex> getV(){
         try{
-            semaphore.acquire();
-            return v;
+            return (List<Vertex>)copycatClient1.submit(new GetVertex()).join();
         }catch(Exception e){
-            System.out.println("exception em getV");
+            System.out.println("exception em getV: "+e);
             return null;
-        } finally{
-            semaphore.release();
         }
     }
     
     public List<Edges> getE(){
-        try{
-            semaphore.acquire();
-            return e;
+         try{
+            return (List<Edges>)copycatClient1.submit(new GetEdges()).join();
         }catch(Exception e){
             System.out.println("exception em getE");
             return null;
-        } finally{
-            semaphore.release();
         }
     }
 
@@ -599,13 +615,10 @@ public class GraphHandler implements Graph.Iface{
     }
             
     public void actuallyUpdateEdgesWeight(double weight, int vertex1, int vertex2){
-        int index;
         try{
-            for(Edges i: e){
+            for(Edges i: getE()){
                 if((i.getV1id() == vertex1 && i.getV2id() == vertex2) || (i.getV1id() == vertex2 && i.getV2id() == vertex1)){
-                    index = e.indexOf(i);
-                    i.setWeight(weight);
-                    e.add(index, i);
+                    copycatClient1.submit(new PutUpdateEdgeWeight(i, weight)).join();
                 }
             }
         }catch(Exception e){
@@ -642,13 +655,10 @@ public class GraphHandler implements Graph.Iface{
     }
     
     public void actuallyUpdateEdgesFlag(int flag, int vertex1, int vertex2){
-        int index;
         try{
-            for(Edges i: e){
+            for(Edges i: getE()){
                 if((i.getV1id() == vertex1 && i.getV2id() == vertex2) || (i.getV1id() == vertex2 && i.getV2id() == vertex1)){
-                    index = e.indexOf(i);
-                    i.setFlag(flag);
-                    e.add(index, i);
+                    copycatClient1.submit(new PutUpdateEdgeFlag(i, flag)).join();
                 }
             }
         }catch(Exception e){
@@ -685,13 +695,10 @@ public class GraphHandler implements Graph.Iface{
     }
     
     public void actuallyUpdateEdgesDescription(String description, int vertex1, int vertex2){
-        int index;
         try{
-            for(Edges i: e){
+            for(Edges i: getE()){
                 if((i.getV1id() == vertex1 && i.getV2id() == vertex2) || (i.getV1id() == vertex2 && i.getV2id() == vertex1)){
-                    index = e.indexOf(i);
-                    i.setDescription(description);
-                    e.add(index, i);
+                    copycatClient1.submit(new PutUpdateEdgeDescription(i, description)).join();
                 }
             }
         }catch(Exception e){
@@ -721,13 +728,10 @@ public class GraphHandler implements Graph.Iface{
     }
     
     public void actuallyUpdateVertexColor(int color, int name){
-        int index;
         try{
-             for(Vertex i: v){
+             for(Vertex i: getV()){
                 if(i.getName() == name){
-                    index = v.indexOf(i);
-                    i.setColor(color);
-                    v.add(index, i);
+                    copycatClient1.submit(new PutUpdateVertexColor(i, color)).join();
                 }
             }
         }catch(Exception e){
@@ -757,13 +761,10 @@ public class GraphHandler implements Graph.Iface{
     }
     
     public void actuallyUpdateVertexDescription(String description, int name){
-        int index;
         try{
-            for(Vertex i: v){
+            for(Vertex i: getV()){
                 if(i.getName() == name){
-                    index = v.indexOf(i);
-                    i.setDescription(description);
-                    v.add(index, i);
+                    copycatClient1.submit(new PutUpdateVertexDescription(i, description)).join();
                 }
             }
         } catch(Exception e){
@@ -793,13 +794,10 @@ public class GraphHandler implements Graph.Iface{
     }
     
     public void actuallyUpdateVertexWeight(double weight, int name){
-        int index;
         try{
-            for(Vertex i: v){
+            for(Vertex i: getV()){
                 if(i.getName() == name){
-                    index = v.indexOf(i);
-                    i.setWeight(weight);
-                    v.add(index, i);
+                    copycatClient1.submit(new PutUpdateVertexWeight(i, weight)).join();
                 }
             }
         } catch(Exception e){
