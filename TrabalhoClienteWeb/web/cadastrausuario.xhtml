@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:include src="cabecalho2.xhtml"></ui:include>
+    <h:head>
+        Cadastra Cliente
+    </h:head>
+    <h:body>
+        <h:form>
+            <title>Entre com seus dados</title>
+            <h:outputLabel>Usuário</h:outputLabel>
+            email:<h:inputText value="#{fachada.u.email}" /><br/> <br/>
+            Senha(númerica de 1-9):<h:inputText value="#{fachada.u.senha}" /><br/> <br/>
+            Nome:<h:inputText value="#{fachada.u.description}" /><br/> <br/>
+
+            <h:commandButton action="#{fachada.addUser()}" value="Criar conta"/>
+        </h:form> 
+        
+        
+        
+        
+        <h:panelGroup layout="block" class="content">
+            #{fachada.allUsers()}
+            <h:dataTable value="#{fachada.lv}" var="user1"  binding="#{table2}" id="table22">
+
+                <h:column>
+                    <f:facet name="header">Nome</f:facet>
+                    <h:outputText value="#{user1.description}" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Senha</f:facet>
+                    <h:outputText value="#{user1.name}" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">email</f:facet>
+                    <h:outputText value="#{user1.email}" />
+                </h:column>
+
+            </h:dataTable>
+        </h:panelGroup>    
+    </h:body>
+</html>
+

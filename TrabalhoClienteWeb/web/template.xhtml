@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"> 
+    <head> 
+          <title><ui:insert name="title">Compre mais e melhor!</ui:insert></title> 
+          <style type="text/css"> 
+                body, input 
+                { 
+                  font-family: Segoe UI; 
+                  font-size: 12pt; 
+                }  
+                input 
+                { 
+                  padding: 2px; 
+                  margin-top: 5px; 
+                } 
+                input[type='submit'] 
+                { 
+                  width: 235px; 
+                } 
+          </style>
+      </head>
+
+      <body> 
+            <div id="header"> 
+                <ui:insert name="header"> 
+                  <!-- Import de página do cabeçalho --> 
+                  <ui:include src="header.xhtml"/> 
+                </ui:insert> 
+            </div> 
+
+            <div id="content"> 
+              <ui:insert name="content"> 
+              </ui:insert> 
+            </div> 
+
+            <div id="footer"> 
+              <ui:insert name="footer"> 
+                  <!-- Import de página do rodapé --> 
+                        <ui:include src="footer.xhtml"/> 
+              </ui:insert> 
+            </div> 
+          </body> 
+</html>

@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:include src="cabecalho.xhtml"></ui:include>
+    <h:head>
+        <title>Cadastra Filme</title>
+    </h:head>
+    
+    <h:body>
+        <title>Entre com as informações do Filme</title>
+        <h:form>
+        
+            <h:outputLabel>Filme</h:outputLabel>
+            Nome do Filme:<h:inputText value="#{fachada.my.name}" /><br/> <br/>
+            Código do Filme:<h:inputText value="#{fachada.my.id}" /><br/> <br/>
+            Diretor:<h:inputText value="#{fachada.mc.director}" /><br/> <br/>
+            Ator/Atriz principal:<h:inputText value="#{fachada.mc.main_chracter}" /><br/> <br/>
+            Produtor:<h:inputText value="#{fachada.mc.productor}" /><br/> <br/>
+            Nota Filme:<h:selectOneMenu value="#{fachada.my.rating}">
+                <f:selectItem itemValue="1" itemLabel="1" />
+                <f:selectItem itemValue="2" itemLabel="2" />
+                <f:selectItem itemValue="3" itemLabel="3" />
+                <f:selectItem itemValue="4" itemLabel="4" />
+                <f:selectItem itemValue="5" itemLabel="5" />
+                <f:selectItem itemValue="6" itemLabel="6" />
+                <f:selectItem itemValue="7" itemLabel="7" />
+                <f:selectItem itemValue="8" itemLabel="8" />
+                <f:selectItem itemValue="9" itemLabel="9" />
+                <f:selectItem itemValue="10" itemLabel="10" />
+            </h:selectOneMenu><br/> <br/>
+            <h:commandButton action="#{fachada.addMovies()}" value="Adicionar"/>
+        </h:form>
+        
+        
+        <h:panelGroup layout="block" class="content">
+            #{fachada.allMovies()}
+            <h:dataTable value="#{fachada.lm}" var="filme1"  binding="#{table1}" id="table99">
+
+                <h:column>
+                    <f:facet name="header">Codigo do Filme</f:facet>
+                    <h:outputText value="#{filme1.id}" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Nome do Filme</f:facet>
+                    <h:outputText value="#{filme1.name}" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Diretor</f:facet>
+                    <h:outputText value="#{filme1.cast.director}" />
+                </h:column>
+
+            </h:dataTable>
+        </h:panelGroup>
+        
+    </h:body>
+</html>
+

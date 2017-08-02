@@ -1,0 +1,119 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Feb 6, 2015, 1:04:42 AM
+    Author     : laercio
+*/
+#table {width: 100%;border: 1px solid #999999; background-color: #fff; clear: both; margin-bottom: 10px;}
+#table tr th {  padding: 10px; background-color: #cccccc; color: #464646; border-bottom: 0px; text-align: left; cursor: pointer;}
+#table tr td { padding: 8px; border-bottom: 1px solid #dfdfdf; vertical-align: middle; }
+#table tr td a { font-weight: normal; text-decoration: none; padding: 0px 5px 0px 0px; }
+#table tr td a:hover { text-decoration: underline; }
+#table tr td div.operations a { font-size: 12px; margin-right: 15px; text-decoration: none; text-transform: lowercase; }
+#table tr td img { margin: 0px; padding: 0px; }
+
+.content{
+    width:800px;
+    margin: 0 auto;
+
+
+
+    
+
+}
+
+* { margin: 0;}
+html, body { font: 13px "Lucida Grande", Verdana, Arial, "Bitstream Vera Sans", sans-serif; background-color: #f9f9f9; line-height:1.5; height: 100%;
+             scrollbar-arrow-color: #9E9E9E; scrollbar-face-color: #000000; scrollbar-shadow-color: #9E9E9E; scrollbar-highlight-color: #000000; scrollbar-3dlight-color: #9E9E9E; scrollbar-darkshadow-color:#000000; scrollbar-track-color: #000000;
+             BORDER-RIGHT: 0px ridge; BORDER-TOP: 0px ridge; BORDER-LEFT: 0px ridge; BORDER-BOTTOM: 0px ridge}
+
+#form input,
+#form select,
+#form textarea,
+#form fieldset { margin-left: 8px; margin-bottom: 10px}
+h1 { font-family: Arial, sans-serif; color: #464646; font-size: 30px; font-weight: bold; border-bottom: 1px dashed #ccc; margin: 0px 0px 10px 0px;  }
+input, select{
+    
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+    -moz-box-shadow:0 1px 2px #ddd;
+    -webkit-box-shadow:0 1px 2px #ddd;    
+    border:1px solid #aaa;
+}
+
+#form form fieldset{
+    width: 900px
+}
+
+#form form label{
+    float:left;
+    width: 150px;
+    text-align: right;  
+}
+
+#cabecalho{
+    padding: 10px 0px 10px 0px;
+    height: 50px;
+    
+    width: 100%;
+    background: -moz-linear-gradient(top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.65)), color-stop(100%,rgba(0,0,0,0))); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top, rgba(0,0,0,0.65) 0%,rgba(0,0,0,0) 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top, rgba(0,0,0,0.65) 0%,rgba(0,0,0,0) 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top, rgba(0,0,0,0.65) 0%,rgba(0,0,0,0) 100%); /* IE10+ */
+background: linear-gradient(to bottom, rgba(0,0,0,0.65) 0%,rgba(0,0,0,0) 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a6000000', endColorstr='#00000000',GradientType=0 ); /* IE6-9 */
+
+
+}
+#user{
+    float: right
+}
+
+
+
+#menu { padding: 0px 0px 50px 0px; }
+#menu ul { padding:0; float: left; }
+#menu ul li {
+    margin: 0px 0px 0px 10px;
+    padding: 0px;
+    list-style: none;
+    float: left;
+    border: black;
+}
+#menu ul li a {-moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf) );
+	background:-moz-linear-gradient( center top, #ededed 5%, #dfdfdf 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf');
+	background-color:#ededed;
+	-webkit-border-top-left-radius:6px;
+	-moz-border-radius-topleft:6px;
+	border-top-left-radius:6px;
+	-webkit-border-top-right-radius:6px;
+	-moz-border-radius-topright:6px;
+	border-top-right-radius:6px;
+	-webkit-border-bottom-right-radius:6px;
+	-moz-border-radius-bottomright:6px;
+	border-bottom-right-radius:6px;
+	-webkit-border-bottom-left-radius:6px;
+	-moz-border-radius-bottomleft:6px;
+	border-bottom-left-radius:6px;
+	text-indent:0;
+	border:1px solid #dcdcdc;
+	display:inline-block;
+	color:#777777;
+	font-family:arial;
+	font-size:13px;
+	font-weight:bold;
+	font-style:normal;
+	height:40px;
+	line-height:40px;
+	width:150px;
+	text-decoration:none;
+	text-align:center;
+	text-shadow:1px 1px 0px #ffffff; }
