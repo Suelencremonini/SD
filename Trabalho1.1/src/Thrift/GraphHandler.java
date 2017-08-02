@@ -38,6 +38,8 @@ public class GraphHandler implements Graph.Iface{
     
     List<Vertex> v = new ArrayList<>();
     List<Edges> e = new ArrayList<>();
+    List<Movie> m = new ArrayList<>();
+    Caminho p = new Caminho();
     Semaphore semaphore = new Semaphore(1);
     Semaphore semaphoreServersTable = new Semaphore(1);
     Semaphore semaphoreCurrentServer = new Semaphore(1);
@@ -168,6 +170,24 @@ public class GraphHandler implements Graph.Iface{
         }
     }
     
+    
+    /**
+     * pega o server certo de acordo com o vertice passado como parametro e com a funcao hash
+     * @param  moviesNumber
+     * @return 
+     */
+    private Server getCorrectServerForMovie(long id){        
+        try {
+            semaphoreServersTable.acquire();
+            return this.serversTable.get(this.hashFunction(id));
+        } catch (Exception x) {
+            System.out.println("exception em newServersTable: "+x);
+            return null;
+        } finally{
+            semaphoreServersTable.release();
+        }
+    }
+    
     /**
      * pega o server certo de acordo com a aresta passada como parametro e com a funcao hash em cima de um ou de ambos os seus vertices
      * @param edge
@@ -287,6 +307,34 @@ public class GraphHandler implements Graph.Iface{
             semaphore.release();
         }
     }
+    
+    
+    
+    public void actuallyCreateCaminho(Caminho path) {
+        try{
+            semaphore.acquire();
+             p.setPath(path.getPath());
+        }catch(Exception e){
+            System.out.println("actuallyCreateCaminho: "+e);
+        }
+        finally{
+            semaphore.release();
+        }
+    }
+    
+    public Caminho actuallyGetCaminho() {
+        try{
+            semaphore.acquire();
+            return this.p;
+        }catch(Exception e){
+            System.out.println("actuallyGetCaminho: "+e);
+        }
+        finally{
+            semaphore.release();
+        }
+        
+        return null;
+    }
 
     public void CreateVertex(Vertex vertex) throws org.apache.thrift.TException{
         Server correctServer = this.getCorrectServerForVertex(vertex.getName());
@@ -311,12 +359,82 @@ public class GraphHandler implements Graph.Iface{
     
     public void actuallyCreateVertex(Vertex vertex) {
         try {
-            if(!existenceVertex(vertex.getName())){    
+            if(!existenceVertex(vertex.getName())){
+                System.out.println("server "+currentServer+" para vertice: "+vertex);
                 semaphore.acquire();
                 v.add(vertex);
             }
         } catch(Exception e){
             System.out.println("actuallyCreateVertex: cai na exception: "+e);
+        } finally {
+            semaphore.release();            
+        }
+    }
+    
+    public List<Movie> GetMovie() throws org.apache.thrift.TException {
+        List<Movie> allMovies = new ArrayList<>();
+        try{
+            this.semaphoreServersTable.acquire();
+            for(Iterator<Map.Entry<Long, Server>> it = serversTable.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<Long, Server> entry = it.next();
+                allMovies.addAll((List<Movie>)connectToServer (entry.getValue(), null, Graph.Client.class.getMethod("getM", null)));
+            }
+            return allMovies;
+        }catch(Exception e){
+            System.out.println("exception em GetMovies");
+            return null;
+        } finally{
+            semaphoreServersTable.release();
+        }
+    }
+    
+    public long GetNumberofMovies() throws org.apache.thrift.TException {
+        List<Movie> allMovies = new ArrayList<>();
+        try{
+            this.semaphoreServersTable.acquire();
+            for(Iterator<Map.Entry<Long, Server>> it = serversTable.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<Long, Server> entry = it.next();
+                allMovies.addAll((List<Movie>)connectToServer (entry.getValue(), null, Graph.Client.class.getMethod("getM", null)));
+            }
+            return allMovies.size();
+        }catch(Exception e){
+            System.out.println("exception em GetMovies");
+            return -1;
+        } finally{
+            semaphoreServersTable.release();
+        }
+    }
+    
+    public void CreateMovie(Movie movie) throws org.apache.thrift.TException{
+        Server correctServer = this.getCorrectServerForMovie(movie.getId());
+        try{
+            if (!this.areTheSameServers(correctServer, currentServer)) {
+                Movie[] movies = new Movie[1];
+                movies[0] = movie;
+
+                Class[] movieType = new Class[1];
+                movieType[0] = Movie.class;
+
+                connectToServer(correctServer, movies, Graph.Client.class.getMethod("actuallyCreateMovie", movieType));
+            }
+            else {               
+                this.actuallyCreateMovie(movie);
+            }
+        }
+        catch(Exception e){
+            System.out.println("CreateVertex: cai na exception: "+e);
+        }
+    }
+    
+    public void actuallyCreateMovie(Movie movie) {
+        try {
+            //if(!existenceVertex(movie.getName())){
+                System.out.println("server "+currentServer+" para vertice: "+movie);
+                semaphore.acquire();
+                m.add(movie);
+            //}
+        } catch(Exception e){
+            System.out.println("actuallyCreateMovie: cai na exception: "+e);
         } finally {
             semaphore.release();            
         }
@@ -457,6 +575,18 @@ public class GraphHandler implements Graph.Iface{
             return null;
         } finally{
             semaphoreServersTable.release();
+        }
+    }
+    
+    public List<Movie> getM(){
+        try{
+            semaphore.acquire();
+            return m;
+        }catch(Exception e){
+            System.out.println("exception em getM");
+            return null;
+        } finally{
+            semaphore.release();
         }
     }
     
@@ -693,6 +823,44 @@ public class GraphHandler implements Graph.Iface{
                     e.add(index, i);
                 }
             }
+        }catch(Exception e){
+        }
+    }
+    
+    public void UpdateVertexMovie(Movie m, int name) throws TException {
+        try{
+            Server correctServer = this.getCorrectServerForVertex(name);
+            if (!this.areTheSameServers(correctServer, currentServer)) {
+                Object[] listObject = new Object[2];
+                listObject[0] = m;
+                listObject[1] = name;
+
+                Class[] objectType = new Class[2];
+                objectType[0] = Movie.class;
+                objectType[1] = int.class;
+                System.out.println("passou");
+                connectToServer (correctServer, listObject, Graph.Client.class.getMethod("UpdateVertexMovie", objectType));
+            }
+            else {
+                this.actuallyUpdateMovie(m, name);
+            }
+        }catch(Exception e){
+            System.out.println("exception em UpdateVertexMovie: "+e);
+        }
+    }
+    public void actuallyUpdateMovie(Movie m, int name){
+        int index = 0;
+        try{
+             for(Vertex i: v){
+                if(i.getName() == name){
+                    List<Movie> l = i.getMovies();
+                    index = v.indexOf(i);
+                    l.add(m);
+                    i.setMovies(l);
+                    v.add(index, i);
+                }
+            }
+            System.out.println("server "+currentServer+" para vertice: "+v.get(index));
         }catch(Exception e){
         }
     }
